@@ -29,10 +29,14 @@ exports.parseCSV = functions
             const {bucket, name: filePath, contentType, metageneration} = object
 
             const tempFilePath = path.join(os.tmpdir(), path.basename(filePath))
-            await admin.storage().bucket(bucket).file(filePath).
-                download({
-                    destination: tempFilePath
-                })
+            await admin.storage().bucket(bucket).file(filePath).createReadStream().on("data", (chuck) => {
+                logger.log({chuck})
+            }).on("error", (err) => {
+                logger.error({err})
+            })
+            // download({
+            //     destination: tempFilePath
+            // })
             logger.log(`file successfully downloaded at ${tempFilePath}`)
         } catch (err) {
             logger.error(err)
